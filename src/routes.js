@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto"
 import { Database } from "./database/database.js"
+import { pathWithRegex } from "./utils/path-with-regex.js"
 
 const database = new Database()
 
 export const routes = [
   {
     method: "GET",
-    path: "/tasks",
+    path: pathWithRegex("/tasks"),
     handler: (req, res) => {
       const tasks = database.select("tasks")
 
@@ -15,7 +16,7 @@ export const routes = [
   },
   {
     method: "POST",
-    path: "/tasks",
+    path: pathWithRegex("/tasks"),
     handler: (req, res) => {
       const { title, description } = req.body
 
@@ -33,4 +34,17 @@ export const routes = [
       return res.end("Tarefa adicionada com sucesso!")
     }
   },
+  {
+    method: "DELETE",
+    path: pathWithRegex("/tasks/:id"),
+    handler: (req, res) => {
+      const { id } = req.groups
+
+      console.log(id)
+
+      return res
+        .writeHead(204)
+        .end()
+    }
+  }
 ]
