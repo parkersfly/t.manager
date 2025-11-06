@@ -40,7 +40,7 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.groups
 
-      console.log(id)
+      database.delete("tasks", id)
 
       return res
         .writeHead(204)
