@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto"
+
 const tasks = []
 
 export const routes = [
@@ -13,7 +15,16 @@ export const routes = [
     method: "POST",
     path: "/tasks",
     handler: (req, res) => {
-      const { newTask } = req.body
+      const { title, description } = req.body
+
+      const newTask = {
+        id: randomUUID(),
+        title,
+        description,
+        completed_at: null,
+        updated_at: null,
+        created_at: new Date()
+      }
 
       tasks.push(newTask)
 
