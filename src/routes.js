@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto"
+import { Database } from "./database.js"
 
-const tasks = []
+const database = new Database()
 
 export const routes = [
   {
     method: "GET",
     path: "/tasks",
     handler: (req, res) => {
+      const tasks = database.select("tasks")
 
       return res.end(JSON.stringify(tasks))
     }
@@ -26,7 +28,7 @@ export const routes = [
         created_at: new Date()
       }
 
-      tasks.push(newTask)
+      database.insert("tasks", newTask)
 
       return res.end("Tarefa adicionada com sucesso!")
     }
