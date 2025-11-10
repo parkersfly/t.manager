@@ -11,6 +11,8 @@ export const routes = [
     handler: (req, res) => {
       const tasks = database.select("tasks")
 
+      console.log(req.query)
+
       return res.end(JSON.stringify(tasks))
     }
   },
@@ -41,6 +43,23 @@ export const routes = [
       const { id } = req.groups
 
       database.delete("tasks", id)
+
+      return res
+        .writeHead(204)
+        .end()
+    }
+  },
+  {
+    method: "PUT",
+    path: pathWithRegex("/tasks/:id"),
+    handler: (req, res) => {
+      const { title, description } = req.body
+      const { id } = req.groups
+
+      database.update("tasks", id, {
+        title,
+        description
+      })
 
       return res
         .writeHead(204)
