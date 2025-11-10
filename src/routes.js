@@ -11,8 +11,6 @@ export const routes = [
     handler: (req, res) => {
       const tasks = database.select("tasks")
 
-      console.log(req.query)
-
       return res.end(JSON.stringify(tasks))
     }
   },
@@ -64,6 +62,19 @@ export const routes = [
       return res
         .writeHead(204)
         .end()
+    }
+  },
+  {
+    method: "PATCH",
+    path: pathWithRegex("/tasks/:id/complete"),
+    handler: (req, res) => {
+      const { id } = req.params
+
+      database.updateTaskStatus("tasks", id)
+
+      return res  
+        .writeHead(204)
+        .end("")
     }
   }
 ]

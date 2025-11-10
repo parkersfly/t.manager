@@ -62,4 +62,21 @@ export class Database {
       this.#persist()
     }
   }
+
+  updateTaskStatus(table, id){
+      const rowIndex = this.#database[table].findIndex(row => row.id === id)
+      const rowData = this.#database[table][rowIndex]
+
+      if(rowIndex > -1){
+
+        const newRow = {
+          ...rowData,
+          completed_at: rowData.completed_at === null ? "concluida" : null
+        }
+
+        this.#database[table][rowIndex] = newRow
+
+        this.#persist()
+      }
+  }
 }
