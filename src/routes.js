@@ -9,7 +9,12 @@ export const routes = [
     method: "GET",
     path: pathWithRegex("/tasks"),
     handler: (req, res) => {
-      const tasks = database.select("tasks")
+      const { search } = req.query
+
+      const tasks = database.select("tasks", {
+        title: search,
+        description: search
+      })
 
       return res.end(JSON.stringify(tasks))
     }
@@ -38,13 +43,26 @@ export const routes = [
     method: "DELETE",
     path: pathWithRegex("/tasks/:id"),
     handler: (req, res) => {
-      const { id } = req.groups
+      const { id } = req.params
 
-      database.delete("tasks", id)
+      const tasks = database.select("tasks")
+      const tasksInArray = Object.entries(tasks)
+
+      const checkIfTaskExists = tasksInArray.some(item => {
+        return item[1].id === id
+      })
+
+      if (checkIfTaskExists) {
+        database.delete("tasks", id)
+
+        return res
+          .writeHead(204)
+          .end("")
+      }
 
       return res
-        .writeHead(204)
-        .end()
+        .writeHead(404)
+        .end("Tarefa não encontrada")
     }
   },
   {
@@ -52,16 +70,29 @@ export const routes = [
     path: pathWithRegex("/tasks/:id"),
     handler: (req, res) => {
       const { title, description } = req.body
-      const { id } = req.groups
+      const { id } = req.params
 
-      database.update("tasks", id, {
-        title,
-        description
+      const tasks = database.select("tasks")
+      const tasksInArray = Object.entries(tasks)
+
+      const checkIfTaskExists = tasksInArray.some(item => {
+        return item[1].id === id
       })
 
+      if (checkIfTaskExists) {
+        database.update("tasks", id, {
+          title,
+          description
+        })
+
+        return res
+          .writeHead(204)
+          .end()
+      }
+
       return res
-        .writeHead(204)
-        .end()
+        .writeHead(404)
+        .end("Tarefa não encontrada")
     }
   },
   {
@@ -70,11 +101,25 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params
 
-      database.updateTaskStatus("tasks", id)
+      const tasks = database.select("tasks")
+      const tasksInArray = Object.entries(tasks)
 
-      return res  
-        .writeHead(204)
-        .end("")
+      const checkIfTaskExists = tasksInArray.some(item => {
+        return item[1].id === id
+      })
+
+      if (checkIfTaskExists) {
+        database.updateTaskStatus("tasks", id)
+
+        return res
+          .writeHead(204)
+          .end()
+      }
+
+
+      return res
+        .writeHead(404)
+        .end("Tarefa não encontrada")
     }
   }
 ]
