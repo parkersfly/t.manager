@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { Database } from "./database/database.js"
 import { pathWithRegex } from "./utils/path-with-regex.js"
+import { importCsv } from "./utils/import-csv.js"
 
 const database = new Database()
 
@@ -23,20 +24,46 @@ export const routes = [
     method: "POST",
     path: pathWithRegex("/tasks"),
     handler: (req, res) => {
-      const { title, description } = req.body
 
-      const newTask = {
-        id: randomUUID(),
-        title,
-        description,
-        completed_at: null,
-        updated_at: null,
-        created_at: new Date()
+      if (req.body) {
+        const { title, description } = req.body
+
+        if (title, description) {
+          const newTask = {
+            id: randomUUID(),
+            title,
+            description,
+            completed_at: null,
+            updated_at: null,
+            created_at: new Date()
+          }
+
+          database.insert("tasks", newTask)
+        }
       }
 
-      database.insert("tasks", newTask)
+      importCsv()
+        .then((data) => {
+          const newTask = data.map((task) => {
+            return database.insert("tasks", {
+              id: randomUUID(),
+              title: task.title,
+              description: task.description,
+              completed_at: null,
+              updated_at: null,
+              created_at: new Date()
+            })
+          })
 
-      return res.end("Tarefa adicionada com sucesso!")
+          return newTask
+        })
+        .catch(() => {
+          "Não foi possível ler o arquivo!"
+        })
+
+      return res
+        .writeHead(201)
+        .end("Tarefa adicionada com sucesso!")
     }
   },
   {
@@ -115,7 +142,6 @@ export const routes = [
           .writeHead(204)
           .end()
       }
-
 
       return res
         .writeHead(404)
