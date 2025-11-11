@@ -28,124 +28,126 @@ export const routes = [
       if (req.body) {
         const { title, description } = req.body
 
-        if (title, description) {
-          const newTask = {
+        if (title || description === "") {
+          return res.end("Digite um título e uma descrição para a tarefa")
+        }
+
+        const newTask = {
+          id: randomUUID(),
+          title,
+          description,
+          completed_at: null,
+          updated_at: null,
+          created_at: new Date()
+        }
+
+        database.insert("tasks", newTask)
+      } else {
+      importCsv()
+        .then((data) => {
+        const newTask = data.map((task) => {
+          return database.insert("tasks", {
             id: randomUUID(),
-            title,
-            description,
+            title: task.title,
+            description: task.description,
             completed_at: null,
             updated_at: null,
             created_at: new Date()
-          }
-
-          database.insert("tasks", newTask)
-        }
-      }
-
-      importCsv()
-        .then((data) => {
-          const newTask = data.map((task) => {
-            return database.insert("tasks", {
-              id: randomUUID(),
-              title: task.title,
-              description: task.description,
-              completed_at: null,
-              updated_at: null,
-              created_at: new Date()
-            })
           })
-
-          return newTask
         })
+
+        return newTask
+      })
         .catch(() => {
           "Não foi possível ler o arquivo!"
         })
+    }
 
       return res
-        .writeHead(201)
-        .end("Tarefa adicionada com sucesso!")
-    }
+      .writeHead(201)
+      .end("Tarefa adicionada com sucesso!")
+  }
   },
-  {
-    method: "DELETE",
+{
+  method: "DELETE",
     path: pathWithRegex("/tasks/:id"),
-    handler: (req, res) => {
-      const { id } = req.params
+      handler: (req, res) => {
+        const { id } = req.params
 
-      const tasks = database.select("tasks")
-      const tasksInArray = Object.entries(tasks)
+        const tasks = database.select("tasks")
+        const tasksInArray = Object.entries(tasks)
 
-      const checkIfTaskExists = tasksInArray.some(item => {
-        return item[1].id === id
-      })
-
-      if (checkIfTaskExists) {
-        database.delete("tasks", id)
-
-        return res
-          .writeHead(204)
-          .end("")
-      }
-
-      return res
-        .writeHead(404)
-        .end("Tarefa não encontrada")
-    }
-  },
-  {
-    method: "PUT",
-    path: pathWithRegex("/tasks/:id"),
-    handler: (req, res) => {
-      const { title, description } = req.body
-      const { id } = req.params
-
-      const tasks = database.select("tasks")
-      const tasksInArray = Object.entries(tasks)
-
-      const checkIfTaskExists = tasksInArray.some(item => {
-        return item[1].id === id
-      })
-
-      if (checkIfTaskExists) {
-        database.update("tasks", id, {
-          title,
-          description
+        const checkIfTaskExists = tasksInArray.some(item => {
+          return item[1].id === id
         })
 
-        return res
-          .writeHead(204)
-          .end()
-      }
+        if (checkIfTaskExists) {
+          database.delete("tasks", id)
 
-      return res
-        .writeHead(404)
-        .end("Tarefa não encontrada")
-    }
-  },
-  {
-    method: "PATCH",
+          return res
+            .writeHead(204)
+            .end("")
+        }
+
+        return res
+          .writeHead(404)
+          .end("Tarefa não encontrada")
+      }
+},
+{
+  method: "PUT",
+    path: pathWithRegex("/tasks/:id"),
+      handler: (req, res) => {
+        const { title, description } = req.body
+        const { id } = req.params
+
+        const tasks = database.select("tasks")
+        const tasksInArray = Object.entries(tasks)
+
+        const checkIfTaskExists = tasksInArray.some(item => {
+          return item[1].id === id
+        })
+
+        if (checkIfTaskExists) {
+          database.update("tasks", id, {
+            title,
+            description
+          })
+
+          return res
+            .writeHead(204)
+            .end()
+        }
+
+        return res
+          .writeHead(404)
+          .end("Tarefa não encontrada")
+      }
+},
+{
+  method: "PATCH",
     path: pathWithRegex("/tasks/:id/complete"),
-    handler: (req, res) => {
-      const { id } = req.params
+      handler: (req, res) => {
+        const { id } = req.params
 
-      const tasks = database.select("tasks")
-      const tasksInArray = Object.entries(tasks)
+        const tasks = database.select("tasks")
+        const tasksInArray = Object.entries(tasks)
 
-      const checkIfTaskExists = tasksInArray.some(item => {
-        return item[1].id === id
-      })
+        const checkIfTaskExists = tasksInArray.some(item => {
+          return item[1].id === id
+        })
 
-      if (checkIfTaskExists) {
-        database.updateTaskStatus("tasks", id)
+        if (checkIfTaskExists) {
+          database.updateTaskStatus("tasks", id)
+
+          return res
+            .writeHead(204)
+            .end()
+        }
 
         return res
-          .writeHead(204)
-          .end()
+          .writeHead(404)
+          .end("Tarefa não encontrada")
       }
-
-      return res
-        .writeHead(404)
-        .end("Tarefa não encontrada")
-    }
-  }
+}
 ]
